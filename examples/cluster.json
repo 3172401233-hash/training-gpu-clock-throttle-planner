@@ -1,0 +1,41 @@
+{
+  "gpus": [
+    { "id": "n1-gpu0", "node": "node-1", "clockMHz": 1980, "baseClockMHz": 1980, "tempC": 62, "tempLimitC": 87, "powerW": 300, "powerLimitW": 400 },
+    { "id": "n1-gpu1", "node": "node-1", "clockMHz": 1980, "baseClockMHz": 1980, "tempC": 63, "tempLimitC": 87, "powerW": 310, "powerLimitW": 400 },
+    { "id": "n2-gpu0", "node": "node-2", "clockMHz": 900, "baseClockMHz": 1980, "tempC": 94, "tempLimitC": 87, "powerW": 395, "powerLimitW": 400 },
+    { "id": "n2-gpu1", "node": "node-2", "clockMHz": 880, "baseClockMHz": 1980, "tempC": 95, "tempLimitC": 87, "powerW": 398, "powerLimitW": 400 },
+    { "id": "n3-gpu0", "node": "node-3", "clockMHz": 1600, "baseClockMHz": 1980, "tempC": 89, "tempLimitC": 87, "powerW": 320, "powerLimitW": 400 },
+    { "id": "n3-gpu1", "node": "node-3", "clockMHz": 1980, "baseClockMHz": 1980, "tempC": 66, "tempLimitC": 87, "powerW": 300, "powerLimitW": 400 }
+  ],
+  "tasks": [
+    {
+      "id": "train-llm",
+      "phase": "backward",
+      "priority": 10,
+      "ranks": [
+        { "rank": 0, "gpu": "n2-gpu0" },
+        { "rank": 1, "gpu": "n2-gpu1" },
+        { "rank": 2, "gpu": "n1-gpu0" },
+        { "rank": 3, "gpu": "n1-gpu1" }
+      ],
+      "checkpoint": { "step": 1200, "complete": true, "shardsExpected": 4, "shardsPresent": 4 }
+    },
+    {
+      "id": "train-vit",
+      "phase": "forward",
+      "priority": 5,
+      "ranks": [
+        { "rank": 0, "gpu": "n3-gpu0" },
+        { "rank": 1, "gpu": "n3-gpu1" }
+      ],
+      "checkpoint": { "step": 300, "complete": true }
+    }
+  ],
+  "spareNodes": [
+    { "node": "node-spare-1", "freeGpus": 4 }
+  ],
+  "topology": {
+    "type": "ring",
+    "order": ["train-llm:0", "train-llm:1", "train-llm:2", "train-llm:3", "train-vit:0", "train-vit:1"]
+  }
+}
